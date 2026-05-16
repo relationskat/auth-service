@@ -1,7 +1,10 @@
 package config
 
 type Config struct {
-	DB *DB
+	DB       *DB
+	Cache    *Cache
+	Provider *Provider
+	SMTP     *SMTP
 }
 
 func New() (*Config, error) {

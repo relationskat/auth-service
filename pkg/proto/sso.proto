@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/relationskat/auth-service/pkg/gen;authv1";
+
+service Auth {
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc AcceptEmail (AcceptEmailRequest) returns (Response);
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
+    rpc Auth (AuthRequest) returns (AuthResponse);
+    rpc Update (UpdateRequest) returns (UpdateResponse);
+    rpc RequestPasswordReset (RequestPasswordResetRequest) returns (Response);
+    rpc ConfirmPasswordReset (ConfirmPasswordResetRequest) returns (Response);
+    rpc ChangePassword (ChangePasswordRequest) returns (Response);
+    rpc DeleteUser (DeleteUserRequest) returns (Response);
+    rpc ResendConfirmationEmail (ResendConfirmationEmailRequest) returns (Response);
+    rpc GetMe (GetMeRequest) returns (GetMeResponse);
+}
+
+message RegisterRequest {
+    string last_name = 1;
+    string first_name = 2;
+    optional string middle_name = 3;
+    string email = 4;
+    string password = 5;
+}
+
+message RegisterResponse {
+    string id  = 1;
+    string email = 2;
+}
+
+message AcceptEmailRequest{
+    string token = 1;
+}
+
+message Response {
+    bool ok = 1;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message RefreshTokenRequest{
+    string token = 1;
+}
+
+message RefreshTokenResponse{
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message AuthRequest{
+    string token = 1;
+}
+
+message AuthResponse{
+    string id = 1;
+}
+
+message UpdateRequest{
+    string id  = 1;
+    optional string last_name = 2;
+    optional string first_name = 3;
+    optional string middle_name = 4;
+}
+
+message UpdateResponse {
+    string id  = 1;
+    string last_name = 2;
+    string first_name = 3;
+    optional string middle_name = 5;
+}
+
+message RequestPasswordResetRequest {
+    string email = 1;
+}
+
+message ConfirmPasswordResetRequest {
+    string token = 1;
+    string new_password = 2;
+}
+
+message ChangePasswordRequest {
+    string id = 1;
+    string old_password = 2;
+    string new_password = 3;
+}
+
+message DeleteUserRequest {
+    string id = 1;
+}
+
+message ResendConfirmationEmailRequest {
+    string email = 1;
+}
+
+message RequestAccountRestoreRequest {
+    string email = 1;
+}
+
+message ConfirmAccountRestoreRequest {
+    string token = 1;
+}
+
+message GetMeRequest {
+      string id = 1;
+}
+
+message GetMeResponse {
+      string id = 1;
+      string last_name = 2;
+      string first_name = 3;
+      optional string middle_name = 4;
+      string email = 5;
+      bool email_confirmed = 6;
+}
