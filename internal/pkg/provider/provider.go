@@ -1,38 +1,43 @@
 package provider
 
 import (
+	"crypto/rsa"
 	"os"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/relationskat/auth-service/internal/config"
 )
 
 type Provider struct {
-	publicKey  []byte
-	privateKey []byte
+	publicKey  *rsa.PublicKey
+	privateKey *rsa.PrivateKey
 	cfg        *config.Config
 }
 
 func New(cfg *config.Config) (*Provider, error) {
-	provider := &Provider{
-		cfg: cfg,
-	}
-
-	publicKeyPath := provider.cfg.Provider.PublicKeyPath
-
-	publicKey, err := os.ReadFile(publicKeyPath)
+	publicKeyPEM, err := os.ReadFile(cfg.Provider.PublicKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	privateKeyPath := provider.cfg.Provider.PrivateKeyPath
-
-	privateKey, err := os.ReadFile(privateKeyPath)
+	privateKeyPEM, err := os.ReadFile(cfg.Provider.PrivateKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	provider.privateKey = privateKey
-	provider.publicKey = publicKey
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyPEM)
+	if err != nil {
+		return nil, err
+	}
 
-	return provider, nil
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyPEM)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Provider{
+		publicKey:  publicKey,
+		privateKey: privateKey,
+		cfg:        cfg,
+	}, nil
 }

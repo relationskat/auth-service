@@ -97,7 +97,7 @@ func (s *Service) AcceptEmail(ctx context.Context, token string) (bool, error) {
 	if err != nil {
 		s.log.Debug("failed to get token", zap.Error(err))
 		if errors.Is(err, memcached.ErrNotFound) {
-			return false, fmt.Errorf("%s: %w", op, memcached.ErrNotFound)
+			return false, fmt.Errorf("%s: %w", op, ErrTokenNotFound)
 		}
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
@@ -380,7 +380,6 @@ func (s *Service) ConfirmAccountRestore(ctx context.Context, token string) error
 	}
 
 	if err := s.tokens.DeleteToken(token); err != nil {
-		// не критично: токен сам протухнет по TTL
 		s.log.Warn("restore: failed to delete used token", zap.Error(err))
 	}
 

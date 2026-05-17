@@ -26,7 +26,7 @@ func New(log *zap.Logger, cfg config.Config) (*Mailer, error) {
 		cfg.SMTP.From = cfg.SMTP.Username
 	}
 
-	return &SMTP{
+	return &Mailer{
 		log:  log.Named("SMTP"),
 		cfg:  cfg,
 		auth: smtp.PlainAuth("", cfg.SMTP.Username, cfg.SMTP.Password, cfg.SMTP.Host),
@@ -55,11 +55,9 @@ func (s *Mailer) Send(ctx context.Context, to []string, subject, htmlBody string
 	defer c.Close()
 
 	if s.cfg.SMTP.Port != 465 {
-		if s.cfg.SMTP.Port != 465 {
-			if ok, _ := c.Extension("STARTTLS"); ok {
-				if err := c.StartTLS(&tls.Config{ServerName: s.cfg.SMTP.Host}); err != nil {
-					return fmt.Errorf("%s: starttls: %w", op, err)
-				}
+		if ok, _ := c.Extension("STARTTLS"); ok {
+			if err := c.StartTLS(&tls.Config{ServerName: s.cfg.SMTP.Host}); err != nil {
+				return fmt.Errorf("%s: starttls: %w", op, err)
 			}
 		}
 	}

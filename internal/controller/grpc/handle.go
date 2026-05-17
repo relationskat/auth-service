@@ -308,6 +308,45 @@ func (grpc *GRPC) ConfirmAccountRestore(ctx context.Context, in *authv1.ConfirmA
 	return &authv1.Response{Ok: true}, nil
 }
 
+func (grpc *GRPC) RequestPasswordReset(ctx context.Context, in *authv1.RequestPasswordResetRequest) (*authv1.Response, error) {
+	const op = "grpc.RequestPasswordReset"
+
+	if in.GetEmail() == "" || !strings.Contains(in.GetEmail(), "@") {
+		return nil, status.Error(codes.InvalidArgument, "valid email is required")
+	}
+
+	if err := grpc.service.RequestPasswordReset(ctx, in.GetEmail()); err != nil {
+		grpc.log.Error("request password reset failed", zap.String("op", op), zap.Error(err))
+	}
+
+	return &authv1.Response{Ok: true}, nil
+}
+
+func (grpc *GRPC) ConfirmPasswordReset(ctx context.Context, in *authv1.ConfirmPasswordResetRequest) (*authv1.Response, error) {
+	const op = "grpc.ConfirmPasswordReset"
+
+	if in.GetToken() == "" {
+		return nil, status.Error(codes.InvalidArgument, "token is required")
+	}
+	if len(in.GetNewPassword()) < 8 {
+		return nil, status.Error(codes.InvalidArgument, "new_password must be at least 8 characters")
+	}
+
+	if err := grpc.service.ConfirmPasswordReset(ctx, in.GetToken(), in.GetNewPassword()); err != nil {
+		switch {
+		case errors.Is(err, production.ErrTokenNotFound):
+			return nil, status.Error(codes.NotFound, "reset token not found or expired")
+		case errors.Is(err, store.ErrUserNotFound):
+			return nil, status.Error(codes.NotFound, "user not found")
+		default:
+			grpc.log.Error("confirm password reset failed", zap.String("op", op), zap.Error(err))
+			return nil, status.Error(codes.Internal, "internal server error")
+		}
+	}
+
+	return &authv1.Response{Ok: true}, nil
+}
+
 func (grpc *GRPC) GetMe(ctx context.Context, in *authv1.GetMeRequest) (*authv1.GetMeResponse, error) {
 	const op = "grpc.GetMe"
 

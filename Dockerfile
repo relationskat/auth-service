@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /build
 
@@ -21,6 +21,7 @@ WORKDIR /app
 
 COPY --from=builder /build/auth-service /app/auth-service
 COPY config /app/config
+COPY infra/keys /app/keys
 
 USER appuser
 

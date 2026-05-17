@@ -1,0 +1,12 @@
+infra/keys/
+*.pem
+*.key
+
+.env
+config/.env
+config/.config.json
+config/*.local.json
+
+!.env.example
+!config/.env.example
+!config/.config.example.json

@@ -21,28 +21,33 @@ var (
 )
 
 func (p *Provider) NewJwt(id uuid.UUID, role string, isAccess bool) (string, error) {
-	expirationTime := 24 * time.Hour
+	ttl := time.Duration(p.cfg.Provider.AccessTokenTTL) * time.Second
 	if !isAccess {
-		expirationTime = 30 * 24 * time.Hour
+		ttl = time.Duration(p.cfg.Provider.RefreshTokenTTL) * time.Second
+	}
+	if ttl <= 0 {
+		ttl = 24 * time.Hour
+		if !isAccess {
+			ttl = 30 * 24 * time.Hour
+		}
 	}
 
-	claims := &claims{
+	c := &claims{
 		ID:       id.String(),
 		IsAccess: isAccess,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expirationTime)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, c)
 
 	return token.SignedString(p.privateKey)
 }
 
 func (p *Provider) parseJwt(tokenStr string) (*claims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &claims{}, func(t *jwt.Token) (interface{},
-		error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &claims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
