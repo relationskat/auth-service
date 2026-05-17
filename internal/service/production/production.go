@@ -24,6 +24,7 @@ type Service struct {
 	tokens     cache.Cache
 	mailer     *smtp.Mailer
 	provider   *provider.Provider
+	baseURL    string
 }
 
 func New(
@@ -32,6 +33,7 @@ func New(
 	tokens cache.Cache,
 	mailer *smtp.Mailer,
 	provider *provider.Provider,
+	baseURL string,
 ) (*Service, error) {
 	return &Service{
 		log:        log.Named("Service"),
@@ -39,6 +41,7 @@ func New(
 		tokens:     tokens,
 		mailer:     mailer,
 		provider:   provider,
+		baseURL:    baseURL,
 	}, nil
 }
 
@@ -75,8 +78,8 @@ func (s *Service) CreateUser(ctx context.Context, user *domain.RegisterRequest) 
 	subject := "Подтверждение регистрации"
 	body := fmt.Sprintf(
 		`<p>Здравствуйте, %s!</p><p>Для подтверждения почты перейдите по ссылке:</p>`+
-			`<p><a href="https://example.com/verify?token=%s">Подтвердить email</a></p>`,
-		useDTO.FirstName, emailToken,
+			`<p><a href="%s/verify_email?token=%s">Подтвердить email</a></p>`,
+		useDTO.FirstName, s.baseURL, emailToken,
 	)
 
 	if err := s.mailer.Send(ctx, []string{useDTO.Email}, subject, body); err != nil {
@@ -230,9 +233,9 @@ func (s *Service) RequestPasswordReset(ctx context.Context, email string) error 
 	subject := "Сброс пароля"
 	body := fmt.Sprintf(
 		`<p>Вы запросили сброс пароля.</p>`+
-			`<p><a href="https://example.com/reset-password?token=%s">Установить новый пароль<p>`+
+			`<p><a href="%s/reset-password?token=%s">Установить новый пароль<p>`+
 			`<p>Если это были не вы — проигнорируйте письмо. Ссылка действует 1 час.<p>`,
-		resetToken,
+		s.baseURL, resetToken,
 	)
 
 	if err := s.mailer.Send(ctx, []string{email}, subject, body); err != nil {
@@ -349,9 +352,9 @@ func (s *Service) ResendConfirmationEmail(ctx context.Context, email string) err
 	subject := "Подтверждение регистрации"
 	body := fmt.Sprintf(
 		`<p>Здравствуйте, %s!</p><p>Для подтверждения почты перейдите по ссылке:</p>`+
-			`<p><a href="https://example.com/verify?token=%s">Подтвердить email</a></p>`+
+			`<p><a href="%s/verify_email?token=%s">Подтвердить email</a></p>`+
 			`<p>Ссылка действует 24 часа.</p>`,
-		firstName, emailToken,
+		firstName, s.baseURL, emailToken,
 	)
 
 	if err := s.mailer.Send(ctx, []string{email}, subject, body); err != nil {
@@ -427,9 +430,9 @@ func (s *Service) RequestAccountRestore(ctx context.Context, email string) error
 	subject := "Восстановление аккаунта"
 	body := fmt.Sprintf(
 		`<p>Поступил запрос на восстановление вашего аккаунта.</p>`+
-			`<p><a href="https://example.com/restore-account?token=%s">Восстановить аккаунт</a></p>`+
+			`<p><a href="%s/restore-account?token=%s">Восстановить аккаунт</a></p>`+
 			`<p>Если это были не вы — проигнорируйте письмо. Ссылка действует 1 час.</p>`,
-		restoreToken,
+		s.baseURL, restoreToken,
 	)
 
 	if err := s.mailer.Send(ctx, []string{email}, subject, body); err != nil {

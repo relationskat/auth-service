@@ -12,6 +12,7 @@ type Config struct {
 	Provider *Provider
 	SMTP     *SMTP
 	GRPC     *GRPC
+	HTTP     *HTTP
 }
 
 func New() (*Config, error) {
@@ -45,6 +46,11 @@ func New() (*Config, error) {
 			Port:            getEnv("GRPC_PORT", "50051"),
 			RequestTimeout:  time.Duration(getEnvInt("GRPC_REQUEST_TIMEOUT_SECONDS", 15)) * time.Second,
 			ResponseTimeout: time.Duration(getEnvInt("GRPC_RESPONSE_TIMEOUT_SECONDS", 15)) * time.Second,
+		},
+		HTTP: &HTTP{
+			Scheme: getEnv("HTTP_SCHEME", "http"),
+			Host:   getEnv("HTTP_HOST", "localhost"),
+			Port:   getEnv("HTTP_PORT", "8080"),
 		},
 	}
 

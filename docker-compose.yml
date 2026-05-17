@@ -52,6 +52,9 @@ services:
       PROVIDER_PUBLIC_KEY_PATH: /app/keys/public.pem
       GRPC_HOST: 0.0.0.0
       GRPC_PORT: 50051
+      HTTP_SCHEME: ${HTTP_SCHEME}
+      HTTP_HOST: ${HTTP_HOST}
+      HTTP_PORT: ${HTTP_PORT}
     volumes:
       - ./infra/keys:/app/keys:ro
     ports:

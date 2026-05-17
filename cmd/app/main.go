@@ -62,7 +62,7 @@ func main() {
 		log.Fatal("failed to create token provider", zap.Error(err))
 	}
 
-	svc, err := production.New(log, repo, tokens, mailer, prov)
+	svc, err := production.New(log, repo, tokens, mailer, prov, cfg.HTTP.BaseURL())
 	if err != nil {
 		log.Fatal("failed to create service", zap.Error(err))
 	}
