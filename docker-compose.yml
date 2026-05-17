@@ -24,15 +24,6 @@ services:
     ports:
       - "${MEMCACHED_PORT}:11211"
     networks: [auth-net]
-
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: auth-mailpit
-    ports:
-      - "${SMTP_PORT}:1025"
-      - "${MAILPIT_UI_PORT}:8025"
-    networks: [auth-net]
-
   app:
     build:
       context: .
