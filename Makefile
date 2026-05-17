@@ -5,14 +5,13 @@ PRIVATE_KEY := $(KEYS_DIR)/private.pem
 PUBLIC_KEY := $(KEYS_DIR)/public.pem
 BIN := bin/auth-service
 
-.PHONY: help init keys env config build run tidy fmt vet test up down logs clean
+.PHONY: help init keys env build run tidy fmt vet test up down logs clean
 
 help:
 	@echo "Targets:"
-	@echo "  init    - generate keys + create .env + config (bootstrap to run)"
+	@echo "  init    - generate keys + create .env (bootstrap to run)"
 	@echo "  keys    - generate RSA keypair into $(KEYS_DIR)"
 	@echo "  env     - create .env from .env.example if missing"
-	@echo "  config  - create config files from examples if missing"
 	@echo "  build   - build binary into $(BIN)"
 	@echo "  run     - run the service locally"
 	@echo "  tidy    - go mod tidy"
@@ -24,7 +23,7 @@ help:
 	@echo "  logs    - follow app logs"
 	@echo "  clean   - remove generated artifacts"
 
-init: keys env config
+init: keys env
 
 keys: $(PUBLIC_KEY)
 
@@ -39,10 +38,6 @@ $(PUBLIC_KEY): $(PRIVATE_KEY)
 
 env:
 	@test -f .env || (cp .env.example .env && echo "created .env")
-
-config:
-	@test -f config/.config.json || (cp config/.config.example.json config/.config.json && echo "created config/.config.json")
-	@test -f config/.env || (cp config/.env.example config/.env && echo "created config/.env")
 
 build:
 	mkdir -p bin

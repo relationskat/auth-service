@@ -20,7 +20,6 @@ RUN apk add --no-cache ca-certificates tzdata && adduser -D -u 10001 appuser
 WORKDIR /app
 
 COPY --from=builder /build/auth-service /app/auth-service
-COPY config /app/config
 COPY infra/keys /app/keys
 
 USER appuser

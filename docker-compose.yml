@@ -61,7 +61,6 @@ services:
       GRPC_HOST: 0.0.0.0
       GRPC_PORT: 50051
     volumes:
-      - ./config:/app/config:ro
       - ./infra/keys:/app/keys:ro
     ports:
       - "${APP_GRPC_PORT}:50051"
